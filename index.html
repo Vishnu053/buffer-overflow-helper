@@ -30,7 +30,7 @@
             <div class="col-9 mb-2"><input class="form-control" type="text" v-model="charToGenerate"></div>
 
             <label class="col-9">Enter the preferred length</label>
-            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="charLengthToGenerate"></div>
+            <div class="col-9 mb-2"><input class="form-control" type="number" v-model="charLengthToGenerate"></div>
 
             <label class="col-9">Generated Character</label>
             <div class="col-9 mb-2">
@@ -39,7 +39,7 @@
 
             <h3 class="col-12 pl-0 text-primary">Generate BadChars</h3>
             <label class="col-9">Enter the preferred length</label>
-            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="generateBadCharsLength"></div>
+            <div class="col-9 mb-2"><input class="form-control" type="number" v-model="generateBadCharsLength"></div>
 
             <label class="col-9">Payload</label>
             <div class="col-9 mb-2">
@@ -80,11 +80,10 @@
                     this.generateBadChars()
                 },
                 charLengthToGenerate(nv) {
-                    this.generatedChars=""
-                    let a=""
-                    for(let i=1;i<= parseInt(this.charLengthToGenerate);i++){
-                        this.generatedChars=this.generatedChars+this.charToGenerate
-                        console.log(a+"a");
+                    this.generatedChars = ""
+                    let a = ""
+                    for (let i = 1; i <= parseInt(this.charLengthToGenerate); i++) {
+                        this.generatedChars = this.generatedChars + this.charToGenerate
                     }
                 }
             },
@@ -96,11 +95,30 @@
                 generateBadChars() {
                     this.payload = ""
                     if (parseInt(this.generateBadCharsLength) < 16) {
-                        // a="\\x01\\x02\\x03\\x04\\x05\\x05\\x06\\x07\\x08\\x09\\x0a\\x0b\\x0c\\x0d\\x0e\\x0f"
+                        let a = "\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\\x0a\\x0b\\x0c\\x0d\\x0e\\x0f"
+                        for (let i = 1; i <= parseInt(this.generateBadCharsLength); i++) {
+                            this.payload = this.payload + "\\x" + a.split('\\x')[i]
+                        }
+                    } else {
+                        let aa,bb=""
+                        let a = "\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\\x0a\\x0b\\x0c\\x0d\\x0e\\x0f"
+                        for (let i = 1; i < 16; i++) {
+                            aa = aa + "\\x" + a.split('\\x')[i]
+                        }
+                        setTimeout(() => {
+                            for (let i = 16; i < parseInt(this.generateBadCharsLength); i++) {
+                                bb = bb + "\\x" + i.toString(16)
+                            }
+                            setTimeout(() => {
+                                console.log(aa);
+                                console.log(bb);
+                                this.payload=aa+bb
+                                this.payload= this.payload.replace(undefined,'')
+                            },400)
+                        }, 500);
+
                     }
-                    for (let i = 1; i < parseInt(this.generateBadCharsLength); i++) {
-                        this.payload = this.payload + "\\x" + i.toString(16)
-                    }
+
                     console.log(this.payload);
                 },
                 generateNewPayload() {
