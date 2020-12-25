@@ -54,6 +54,14 @@
             <div class="col-9 mb-2"><textarea class="form-control" v-model="newPayload"
                     @keydown.enter="generateNewPayload"></textarea></div>
             <!--<div class="col-3 align-self-end"><button class="btn btn-primary" @click="generateNewPayload">Generate</button></div>-->
+            <h3 class="col-12 pl-0 text-primary">Generate Little Endian</h3>
+            <label class="col-9">Enter the value to convert</label>
+            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="generateLittleEndian"></div>
+
+            <label class="col-9">Generated Little Endian</label>
+            <div class="col-9 mb-2">
+                <textarea class="form-control" v-model="generatedLittleEndian" rows="5"></textarea>
+            </div>
         </div>
 
     </div>
@@ -72,10 +80,18 @@
                     generatedBadChars: "",
                     payload: "",
                     badChars: "",
-                    newPayload: ""
+                    newPayload: "",
+                    generateLittleEndian: "",
+                    generatedLittleEndian: ""
                 }
             },
             watch: {
+                generateLittleEndian(nv) {
+                    this.generatedLittleEndian = ""
+                    let b = nv.match(/.{1,2}/g)
+                    this.generatedLittleEndian = "\\x" + b.reverse().join('\\x')
+
+                },
                 generateBadCharsLength(nv) {
                     this.generateBadChars()
                 },
@@ -100,7 +116,7 @@
                             this.payload = this.payload + "\\x" + a.split('\\x')[i]
                         }
                     } else {
-                        let aa,bb=""
+                        let aa, bb = ""
                         let a = "\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\\x0a\\x0b\\x0c\\x0d\\x0e\\x0f"
                         for (let i = 1; i < 16; i++) {
                             aa = aa + "\\x" + a.split('\\x')[i]
@@ -112,9 +128,9 @@
                             setTimeout(() => {
                                 console.log(aa);
                                 console.log(bb);
-                                this.payload=aa+bb
-                                this.payload= this.payload.replace(undefined,'')
-                            },400)
+                                this.payload = aa + bb
+                                this.payload = this.payload.replace(undefined, '')
+                            }, 400)
                         }, 500);
 
                     }
