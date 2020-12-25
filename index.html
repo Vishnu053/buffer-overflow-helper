@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"
+        integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg=="
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="report" class="mt-5">
+        <div class="row col-9 ml-0 mr-0 mt-2 mb-3 justify-content-end">
+            <h3 class="col-9 text-primary">Generate long characters</h3>
+            <label class="col-9">Enter the preferred character</label>
+            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="charToGenerate"></div>
+
+            <label class="col-9">Enter the preferred length</label>
+            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="charLengthToGenerate"></div>
+
+            <label class="col-9">Generated Character</label>
+            <div class="col-9 mb-2">
+                <textarea class="form-control" v-model="generatedChars" rows="5"></textarea>
+            </div>
+
+            <h3 class="col-9 text-primary">Generate BadChars</h3>
+            <label class="col-9">Enter the preferred length</label>
+            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="generateBadCharsLength"></div>
+
+            <label class="col-9">Payload</label>
+            <div class="col-9 mb-2">
+                <textarea class="form-control" v-model="payload" rows="5"></textarea>
+            </div>
+
+            <label class="col-9">BadChars</label>
+            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="badChars"
+                    @keydown.enter="generateNewPayload"></div>
+
+            <label class="col-9">New Payload</label>
+            <div class="col-9 mb-2"><textarea class="form-control" v-model="newPayload"
+                    @keydown.enter="generateNewPayload"></textarea></div>
+            <div class="col-3"><button class="btn btn-primary" @click="generateNewPayload">Generate</button></div>
+        </div>
+
+    </div>
+
+    <script>
+        const ReportApp = {
+            data() {
+                return {
+                    message: 'Hello Vue!!',
+                    tableData: [],
+                    filename: 'goog.json',
+                    charToGenerate: "A",
+                    charLengthToGenerate: 2000,
+                    generatedChars: "",
+                    generateBadCharsLength: 256,
+                    generatedBadChars: "",
+                    payload: "",
+                    badChars: "",
+                    newPayload: ""
+                }
+            },
+            watch: {
+                generateBadCharsLength(nv) {
+                    this.generateBadChars()
+                },
+                charLengthToGenerate(nv) {
+                    this.generatedChars=""
+                    let a=""
+                    for(let i=1;i<= parseInt(this.charLengthToGenerate);i++){
+                        this.generatedChars=this.generatedChars+this.charToGenerate
+                        console.log(a+"a");
+                    }
+                }
+            },
+            mounted() {
+
+                this.generateBadChars()
+            },
+            methods: {
+                generateBadChars() {
+                    this.payload = ""
+                    if (parseInt(this.generateBadCharsLength) < 16) {
+                        // a="\\x01\\x02\\x03\\x04\\x05\\x05\\x06\\x07\\x08\\x09\\x0a\\x0b\\x0c\\x0d\\x0e\\x0f"
+                    }
+                    for (let i = 1; i < parseInt(this.generateBadCharsLength); i++) {
+                        this.payload = this.payload + "\\x" + i.toString(16)
+                    }
+                    console.log(this.payload);
+                },
+                generateNewPayload() {
+                    console.log(this.payload);
+                    if (this.payload && this.badChars) {
+
+                        let a = this.payload
+                        let p = this.badChars;
+                        var newVal = a.replace(/\\x([0-9A-F]{2})/ig, function () {
+                            return String.fromCharCode(parseInt(arguments[1], 16));
+                        });
+                        var newtest = p.replace(/\\x([0-9A-F]{2})/ig, function () {
+                            return String.fromCharCode(parseInt(arguments[1], 16));
+                        });
+                        let b = ""
+                        console.log(newtest);
+                        for (let i of newtest) {
+                            b = newVal.replace(i, '')
+                        }
+                        setTimeout(() => {
+                            console.log(b);
+
+                            this.newPayload = ""
+                            for (let i in b) {
+                                // console.log("\\x" + b.charCodeAt(i).toString(16))
+                                this.newPayload = this.newPayload + "\\x" + b.charCodeAt(i).toString(16)
+                            }
+                        }, 500);
+
+                    }
+                }
+            }
+        }
+
+        Vue.createApp(ReportApp).mount('#report')
+    </script>
+
+</body>
+
+</html>
