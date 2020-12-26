@@ -6,9 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BuffTools</title>
     <script src="https://unpkg.com/vue@next"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"
-        integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg=="
-        crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -136,6 +133,19 @@
                     }
 
                     console.log(this.payload);
+                },
+                changeTheme(){
+                document.querySelector('body').style.backgroundColor="#1b1b1b"
+                a=document.querySelectorAll('input')
+                b=document.querySelectorAll('textarea')
+                for(let i of a){
+                i.style.background="#212529"
+                i.style.color="#ffffff"
+                }
+                for(let i of b){
+                i.style.background="#212529"
+                i.style.color="#ffffff"
+                }
                 },
                 generateNewPayload() {
                     console.log(this.payload);
