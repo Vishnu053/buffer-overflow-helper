@@ -17,47 +17,79 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
 </head>
 
 <body>
     <div id="report" class="mt-5">
         <div class="row col-12 ml-0 mr-0 mt-2 mb-3 justify-content-start">
-            <h3 class="col-12 pl-0 text-primary">Generate long characters</h3>
-            <label class="col-9">Enter the preferred character</label>
-            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="charToGenerate"></div>
+            <h3 class="col-12 pl-0 text-primary border-bottom">Generate long characters</h3>
+            <label class="col-sm-12 col-lg-9">Enter the preferred character</label>
+            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="charToGenerate"></div>
 
-            <label class="col-9">Enter the preferred length</label>
-            <div class="col-9 mb-2"><input class="form-control" type="number" v-model="charLengthToGenerate"></div>
+            <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
+            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number" v-model="charLengthToGenerate"></div>
 
-            <label class="col-9">Generated Character</label>
-            <div class="col-9 mb-2">
+            <label class="col-sm-12 col-lg-9">Generated Character</label>
+            <div class="col-sm-12 col-lg-9 mb-2">
                 <textarea class="form-control" v-model="generatedChars" rows="5"></textarea>
             </div>
 
-            <h3 class="col-12 pl-0 text-primary">Generate BadChars</h3>
-            <label class="col-9">Enter the preferred length</label>
-            <div class="col-9 mb-2"><input class="form-control" type="number" v-model="generateBadCharsLength"></div>
+            <h3 class="col-12 pl-0 text-primary border-bottom">Generate BadChars</h3>
+            <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
+            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number" v-model="generateBadCharsLength"></div>
 
-            <label class="col-9">Payload</label>
-            <div class="col-9 mb-2">
+            <label class="col-sm-12 col-lg-9">Payload</label>
+            <div class="col-sm-12 col-lg-9 mb-2">
                 <textarea class="form-control" v-model="payload" rows="5"></textarea>
             </div>
 
-            <label class="col-9">BadChars</label>
-            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="badChars"
+            <label class="col-sm-12 col-lg-9">BadChars</label>
+            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="badChars"
                     @keydown.enter="generateNewPayload"></div>
 
-            <label class="col-9">New Payload</label>
-            <div class="col-9 mb-2"><textarea class="form-control" v-model="newPayload"
+            <label class="col-sm-12 col-lg-9">New Payload</label>
+            <div class="col-sm-12 col-lg-9 mb-2"><textarea class="form-control" v-model="newPayload"
                     @keydown.enter="generateNewPayload"></textarea></div>
             <!--<div class="col-3 align-self-end"><button class="btn btn-primary" @click="generateNewPayload">Generate</button></div>-->
-            <h3 class="col-12 pl-0 text-primary">Generate Little Endian</h3>
-            <label class="col-9">Enter the value to convert</label>
-            <div class="col-9 mb-2"><input class="form-control" type="text" v-model="generateLittleEndian"></div>
+            <h3 class="col-12 pl-0 text-primary border-bottom">Generate Little Endian</h3>
+            <label class="col-sm-12 col-lg-9">Enter the value to convert</label>
+            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="generateLittleEndian"></div>
 
-            <label class="col-9">Generated Little Endian</label>
-            <div class="col-9 mb-2">
+            <label class="col-sm-12 col-lg-9">Generated Little Endian</label>
+            <div class="col-sm-12 col-lg-9 mb-2">
                 <textarea class="form-control" v-model="generatedLittleEndian" rows="5"></textarea>
+            </div>
+            <h3 class="col-12 pl-0 text-primary border-bottom">AES ECB</h3>
+            <label class="col-sm-12 col-lg-9">Enter ENC> OR DEC>, followed by the value and key to encrypt/decrypt</label>
+            <div class="col-sm-12 col-lg-9 mb-2">
+                <textarea class="form-control" v-model="generateAesEcb" rows="5"></textarea>
+            </div>
+            <div class="col-sm-12 col-lg-9 mb-2">
+                <label class="col-sm-12 col-lg-9">Secret Key</label>
+                <input type="text" class="form-control" v-model="aesEcbKey"></input>
+            </div>
+            <label class="col-sm-12 col-lg-9">Encrypted/Decrypted AES ECB</label>
+            <div class="col-sm-12 col-lg-9 mb-2">
+                <textarea class="form-control" v-model="generatedAesEcb" rows="5"></textarea>
+            </div>
+            <h3 class="col-12 pl-0 text-primary border-bottom">AES CBC</h3>
+            <label class="col-sm-12 col-lg-9">Enter ENC> OR DEC>, followed by the value, key and IV to encrypt/decrypt</label>
+            <div class="col-sm-12 col-lg-9 mb-2">
+                <textarea class="form-control" v-model="generateAesCbc" rows="5"></textarea>
+            </div>
+            <div class="col-sm-12 col-lg-9 mb-2 row pr-0">
+                <div class="col-12 pr-0"><label class="col-12 pl-0">Secret Key (32 chars recommended)</label>
+                    <input type="text" class="form-control col-12" v-model="aesCbcKey"></input>
+                </div>
+                <div class="col-12 pr-0">
+                    <label class="col-12 pr-0">IV (16 chars recommended)</label>
+                    <input type="text" class="form-control col-12" v-model="aesCbcIv"></input>
+                </div>
+            </div>
+            <label class="col-sm-12 col-lg-9">Encrypted/Decrypted AES CBC</label>
+            <div class="col-sm-12 col-lg-9 mb-2">
+                <textarea class="form-control" v-model="generatedAesCbc" rows="5"></textarea>
             </div>
         </div>
 
@@ -79,7 +111,14 @@
                     badChars: "",
                     newPayload: "",
                     generateLittleEndian: "",
-                    generatedLittleEndian: ""
+                    generatedLittleEndian: "",
+                    generateAesEcb: "",
+                    aesEcbKey: "",
+                    generatedAesEcb: "",
+                    generateAesCbc: "",
+                    aesCbcKey: "",
+                    aesCbcIv: "",
+                    generatedAesCbc: ""
                 }
             },
             watch: {
@@ -98,6 +137,32 @@
                     for (let i = 1; i <= parseInt(this.charLengthToGenerate); i++) {
                         this.generatedChars = this.generatedChars + this.charToGenerate
                     }
+                },
+                generateAesEcb(nv) {
+                    let e = ""
+                    this.generatedAesEcb = ""
+                    if (!this.aesEcbKey) { return }
+                    this.startCrackingAesEcb(nv)
+
+                },
+                aesEcbKey(nv) {
+                    if (!nv) { return }
+                    this.startCrackingAesEcb(this.generateAesEcb)
+                },
+                generateAesCbc(nv) {
+                    let e = ""
+                    this.generatedAesEcb = ""
+                    if (!this.aesCbcKey || !this.aesCbcIv) { return }
+                    this.startCrackingAesCbc(nv)
+
+                },
+                aesCbcKey(nv) {
+                    if (!nv || !this.aesCbcIv) { return }
+                    this.startCrackingAesCbc(this.generateAesCbc)
+                },
+                aesCbcIv(nv) {
+                    if (!nv || !this.aesCbcKey) { return }
+                    this.startCrackingAesCbc(this.generateAesCbc)
                 }
             },
             mounted() {
@@ -105,6 +170,24 @@
                 this.generateBadChars()
             },
             methods: {
+                startCrackingAesEcb(nv) {
+                    if (nv.includes('ENC>')) {
+                        e = nv.split('ENC>')[1]
+                        this.generatedAesEcb = this.encryptHashEcb(e, this.aesEcbKey)
+                    } else if (nv.includes('DEC>')) {
+                        e = nv.split('DEC>')[1]
+                        this.generatedAesEcb = this.decryptHashEcb(e, this.aesEcbKey)
+                    }
+                },
+                startCrackingAesCbc(nv) {
+                    if (nv.includes('ENC>')) {
+                        e = nv.split('ENC>')[1]
+                        this.generatedAesCbc = this.encryptAesCbcIv(e)
+                    } else if (nv.includes('DEC>')) {
+                        e = nv.split('DEC>')[1]
+                        this.generatedAesCbc = this.decryptAesCbcIv(e)
+                    }
+                },
                 generateBadChars() {
                     this.payload = ""
                     if (parseInt(this.generateBadCharsLength) < 16) {
@@ -123,8 +206,6 @@
                                 bb = bb + "\\x" + i.toString(16)
                             }
                             setTimeout(() => {
-                                console.log(aa);
-                                console.log(bb);
                                 this.payload = aa + bb
                                 this.payload = this.payload.replace(undefined, '')
                             }, 400)
@@ -132,20 +213,20 @@
 
                     }
 
-                    console.log(this.payload);
+                    // console.log(this.payload);
                 },
-                changeTheme(){
-                document.querySelector('body').style.backgroundColor="#1b1b1b"
-                a=document.querySelectorAll('input')
-                b=document.querySelectorAll('textarea')
-                for(let i of a){
-                i.style.background="#212529"
-                i.style.color="#ffffff"
-                }
-                for(let i of b){
-                i.style.background="#212529"
-                i.style.color="#ffffff"
-                }
+                changeTheme() {
+                    document.querySelector('body').style.backgroundColor = "#1b1b1b"
+                    a = document.querySelectorAll('input')
+                    b = document.querySelectorAll('textarea')
+                    for (let i of a) {
+                        i.style.background = "#212529"
+                        i.style.color = "#ffffff"
+                    }
+                    for (let i of b) {
+                        i.style.background = "#212529"
+                        i.style.color = "#ffffff"
+                    }
                 },
                 generateNewPayload() {
                     console.log(this.payload);
@@ -175,6 +256,43 @@
                         }, 500);
 
                     }
+                },
+                encryptHashEcb(message = '', key = '') {
+                    var res = CryptoJS.AES.encrypt(message, key);
+                    return res.toString();
+                },
+                decryptHashEcb(message = '', key = '') {
+                    var code = CryptoJS.AES.decrypt(message, key);
+                    var decryptedMessage = code.toString(CryptoJS.enc.Utf8);
+
+                    return decryptedMessage;
+                },
+                encryptAesCbcIv(str) {
+                    var key = CryptoJS.enc.Utf8.parse(this.aesCbcKey);
+                    var iv = CryptoJS.enc.Utf8.parse(this.aesCbcIv);
+
+                    var encrypted = '';
+
+                    var srcs = CryptoJS.enc.Utf8.parse(str);
+                    encrypted = CryptoJS.AES.encrypt(srcs, key, {
+                        iv: iv,
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+
+                    return encrypted.ciphertext.toString();
+                },
+                decryptAesCbcIv(str) {
+                    let [key, iv] = [CryptoJS.enc.Utf8.parse(this.aesCbcKey), CryptoJS.enc.Utf8.parse(this.aesCbcIv)]
+                    var encryptedHexStr = CryptoJS.enc.Hex.parse(str);
+                    var srcs = CryptoJS.enc.Base64.stringify(encryptedHexStr);
+                    var decrypt = CryptoJS.AES.decrypt(srcs, key, {
+                        iv: iv,
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+                    var decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
+                    return decryptedStr.toString();
                 }
             }
         }
