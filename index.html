@@ -28,7 +28,8 @@
             <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="charToGenerate"></div>
 
             <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number" v-model="charLengthToGenerate"></div>
+            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number"
+                    v-model="charLengthToGenerate"></div>
 
             <label class="col-sm-12 col-lg-9">Generated Character</label>
             <div class="col-sm-12 col-lg-9 mb-2">
@@ -37,7 +38,8 @@
 
             <h3 class="col-12 pl-0 text-primary border-bottom">Generate BadChars</h3>
             <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number" v-model="generateBadCharsLength"></div>
+            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number"
+                    v-model="generateBadCharsLength"></div>
 
             <label class="col-sm-12 col-lg-9">Payload</label>
             <div class="col-sm-12 col-lg-9 mb-2">
@@ -54,14 +56,16 @@
             <!--<div class="col-3 align-self-end"><button class="btn btn-primary" @click="generateNewPayload">Generate</button></div>-->
             <h3 class="col-12 pl-0 text-primary border-bottom">Generate Little Endian</h3>
             <label class="col-sm-12 col-lg-9">Enter the value to convert</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="generateLittleEndian"></div>
+            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="generateLittleEndian">
+            </div>
 
             <label class="col-sm-12 col-lg-9">Generated Little Endian</label>
             <div class="col-sm-12 col-lg-9 mb-2">
                 <textarea class="form-control" v-model="generatedLittleEndian" rows="5"></textarea>
             </div>
-            <h3 class="col-12 pl-0 text-primary border-bottom">AES ECB</h3>
-            <label class="col-sm-12 col-lg-9">Enter ENC> OR DEC>, followed by the value and key to encrypt/decrypt</label>
+            <!-- <h3 class="col-12 pl-0 text-primary border-bottom">AES ECB</h3>
+            <label class="col-sm-12 col-lg-9">Enter ENC> OR DEC>, followed by the value and key to
+                encrypt/decrypt</label>
             <div class="col-sm-12 col-lg-9 mb-2">
                 <textarea class="form-control" v-model="generateAesEcb" rows="5"></textarea>
             </div>
@@ -74,7 +78,8 @@
                 <textarea class="form-control" v-model="generatedAesEcb" rows="5"></textarea>
             </div>
             <h3 class="col-12 pl-0 text-primary border-bottom">AES CBC</h3>
-            <label class="col-sm-12 col-lg-9">Enter ENC> OR DEC>, followed by the value, key and IV to encrypt/decrypt</label>
+            <label class="col-sm-12 col-lg-9">Enter ENC> OR DEC>, followed by the value, key and IV to
+                encrypt/decrypt</label>
             <div class="col-sm-12 col-lg-9 mb-2">
                 <textarea class="form-control" v-model="generateAesCbc" rows="5"></textarea>
             </div>
@@ -90,7 +95,19 @@
             <label class="col-sm-12 col-lg-9">Encrypted/Decrypted AES CBC</label>
             <div class="col-sm-12 col-lg-9 mb-2">
                 <textarea class="form-control" v-model="generatedAesCbc" rows="5"></textarea>
-            </div>
+            </div> -->
+
+            <template v-for="(hash,i) in hashes" :key="'hash'+i">
+                <h3 class="col-12 pl-0 text-primary border-bottom">{{hash.title}}</h3>
+                <label class="col-sm-12 col-lg-9">{{hash.label}}</label>
+                <div class="col-sm-12 col-lg-9 mb-2">
+                    <textarea class="form-control" v-model="hash.inputmodel" rows="5"
+                        @input="onHashInput(hash.functionToExecute,hash.inputmodel,i)"></textarea>
+                </div>
+                <div class="col-sm-12 col-lg-9 mb-2">
+                    <textarea class="form-control" v-model="hash.outputmodel" rows="5"></textarea>
+                </div>
+            </template>
         </div>
 
     </div>
@@ -118,7 +135,85 @@
                     generateAesCbc: "",
                     aesCbcKey: "",
                     aesCbcIv: "",
-                    generatedAesCbc: ""
+                    generatedAesCbc: "",
+                    generateMD5String: "",
+                    generatedMD5: "",
+                    generateSHA1String: "",
+                    generatedSHA1: "",
+                    generateSHA3String: "",
+                    generatedSHA3: "",
+                    generateSHA224String: "",
+                    generatedSHA224: "",
+                    generateSHA256String: "",
+                    generatedSHA256: "",
+                    generateB64String: "",
+                    generatedB64: "",
+                    hashes: [
+                        {
+                            title: "Encode Base64",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "base64enc"
+                        },
+                        {
+                            title: "Decode Base64",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "base64dec"
+                        },
+                        {
+                            title: "Generate MD5",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "md5"
+                        },
+                        {
+                            title: "Generate SHA1",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "sha1"
+                        },
+                        {
+                            title: "Generate SHA3",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "sha3"
+                        },
+                        {
+                            title: "Generate SHA224",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "sha224"
+                        },
+                        {
+                            title: "Generate SHA256",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "sha256"
+                        },
+                        {
+                            title: "Generate SHA384",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "sha384"
+                        },
+                        {
+                            title: "Generate SHA512",
+                            label: "Enter the value to generate",
+                            inputmodel: "",
+                            outputmodel: "",
+                            functionToExecute: "sha512"
+                        }
+
+                    ]
                 }
             },
             watch: {
@@ -163,6 +258,9 @@
                 aesCbcIv(nv) {
                     if (!nv || !this.aesCbcKey) { return }
                     this.startCrackingAesCbc(this.generateAesCbc)
+                },
+                generateMD5String(nv) {
+                    this.generateMD5(nv)
                 }
             },
             mounted() {
@@ -293,7 +391,67 @@
                     });
                     var decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
                     return decryptedStr.toString();
-                }
+                },
+                generateMD5(nv) {
+                    if (nv.length > 0) {
+                        this.generatedMD5 = CryptoJS.MD5(nv).toString()
+                    }
+                },
+                onHashInput(h, i, index) {
+                    if (h) {
+                        switch (h) {
+                            case 'md5':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = CryptoJS.MD5(i).toString()
+                                }
+                                break;
+                            case 'sha1':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = CryptoJS.SHA1(i).toString()
+                                }
+                                break;
+                            case 'sha3':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = CryptoJS.SHA3(i).toString()
+                                }
+                                break;
+                            case 'sha224':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = CryptoJS.SHA224(i).toString()
+                                }
+                                break;
+                            case 'sha256':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = CryptoJS.SHA256(i).toString()
+                                }
+                                break;
+                            case 'sha384':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = CryptoJS.SHA384(i).toString()
+                                }
+                                break;
+                            case 'sha512':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = CryptoJS.SHA512(i).toString()
+                                }
+                                break;
+                            case 'base64enc':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = btoa(i)
+                                }
+                                break;
+                            case 'base64dec':
+                                if (i.length > 0) {
+                                    this.hashes[index].outputmodel = atob(i)
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
+                },
+
             }
         }
 
