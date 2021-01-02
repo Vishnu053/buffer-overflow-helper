@@ -6,108 +6,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BuffTools</title>
     <script src="https://unpkg.com/vue@next"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
 </head>
 
 <body>
-    <div id="report" class="mt-5">
-        <div class="row col-12 ml-0 mr-0 mt-2 mb-3 justify-content-start">
-            <h3 class="col-12 pl-0 text-primary border-bottom">Generate long characters</h3>
-            <label class="col-sm-12 col-lg-9">Enter the preferred character</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="charToGenerate"></div>
-
-            <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number"
-                    v-model="charLengthToGenerate"></div>
-
-            <label class="col-sm-12 col-lg-9">Generated Character</label>
-            <div class="col-sm-12 col-lg-9 mb-2">
-                <textarea class="form-control" v-model="generatedChars" rows="5"></textarea>
-            </div>
-
-            <h3 class="col-12 pl-0 text-primary border-bottom">Generate BadChars</h3>
-            <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number"
-                    v-model="generateBadCharsLength"></div>
-
-            <label class="col-sm-12 col-lg-9">Payload</label>
-            <div class="col-sm-12 col-lg-9 mb-2">
-                <textarea class="form-control" v-model="payload" rows="5"></textarea>
-            </div>
-
-            <label class="col-sm-12 col-lg-9">BadChars</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="badChars"
-                    @keydown.enter="generateNewPayload"></div>
-
-            <label class="col-sm-12 col-lg-9">New Payload</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><textarea class="form-control" v-model="newPayload"
-                    @keydown.enter="generateNewPayload"></textarea></div>
-            <!--<div class="col-3 align-self-end"><button class="btn btn-primary" @click="generateNewPayload">Generate</button></div>-->
-            <h3 class="col-12 pl-0 text-primary border-bottom">Generate Little Endian</h3>
-            <label class="col-sm-12 col-lg-9">Enter the value to convert</label>
-            <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="generateLittleEndian">
-            </div>
-
-            <label class="col-sm-12 col-lg-9">Generated Little Endian</label>
-            <div class="col-sm-12 col-lg-9 mb-2">
-                <textarea class="form-control" v-model="generatedLittleEndian" rows="5"></textarea>
-            </div>
-            <!-- <h3 class="col-12 pl-0 text-primary border-bottom">AES ECB</h3>
-            <label class="col-sm-12 col-lg-9">Enter ENC> OR DEC>, followed by the value and key to
-                encrypt/decrypt</label>
-            <div class="col-sm-12 col-lg-9 mb-2">
-                <textarea class="form-control" v-model="generateAesEcb" rows="5"></textarea>
-            </div>
-            <div class="col-sm-12 col-lg-9 mb-2">
-                <label class="col-sm-12 col-lg-9">Secret Key</label>
-                <input type="text" class="form-control" v-model="aesEcbKey"></input>
-            </div>
-            <label class="col-sm-12 col-lg-9">Encrypted/Decrypted AES ECB</label>
-            <div class="col-sm-12 col-lg-9 mb-2">
-                <textarea class="form-control" v-model="generatedAesEcb" rows="5"></textarea>
-            </div>
-            <h3 class="col-12 pl-0 text-primary border-bottom">AES CBC</h3>
-            <label class="col-sm-12 col-lg-9">Enter ENC> OR DEC>, followed by the value, key and IV to
-                encrypt/decrypt</label>
-            <div class="col-sm-12 col-lg-9 mb-2">
-                <textarea class="form-control" v-model="generateAesCbc" rows="5"></textarea>
-            </div>
-            <div class="col-sm-12 col-lg-9 mb-2 row pr-0">
-                <div class="col-12 pr-0"><label class="col-12 pl-0">Secret Key (32 chars recommended)</label>
-                    <input type="text" class="form-control col-12" v-model="aesCbcKey"></input>
+    <div id="report" class="mt-2">
+        <div class="sticky-top bg-white py-1">
+            <nav class="nav nav-pills nav-fill mx-2">
+                <a v-for="(type,i) in links" :key="'type'+i" :class="type.active?'nav-link active':'nav-link'"
+                    aria-current="page" href="#" @click="filterBytType(type)">{{type.name}}</a>
+            </nav>
+        </div>
+        <div class="row col-12 mx-0 mt-3 mb-3 justify-content-start">
+            <div v-if="filteredType=='buffOvf'">
+                <h3 class="col-12 pl-0 text-primary border-bottom">Generate long characters</h3>
+                <label class="col-sm-12 col-lg-9">Enter the preferred character</label>
+                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="charToGenerate">
                 </div>
-                <div class="col-12 pr-0">
-                    <label class="col-12 pr-0">IV (16 chars recommended)</label>
-                    <input type="text" class="form-control col-12" v-model="aesCbcIv"></input>
-                </div>
-            </div>
-            <label class="col-sm-12 col-lg-9">Encrypted/Decrypted AES CBC</label>
-            <div class="col-sm-12 col-lg-9 mb-2">
-                <textarea class="form-control" v-model="generatedAesCbc" rows="5"></textarea>
-            </div> -->
 
-            <template v-for="(hash,i) in hashes" :key="'hash'+i">
-                <h3 class="col-12 pl-0 text-primary border-bottom">{{hash.title}}</h3>
-                <label class="col-sm-12 col-lg-9">{{hash.label}}</label>
+                <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
+                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number"
+                        v-model="charLengthToGenerate"></div>
+
+                <label class="col-sm-12 col-lg-9">Generated Character</label>
                 <div class="col-sm-12 col-lg-9 mb-2">
-                    <textarea class="form-control" v-model="hash.inputmodel" rows="5"
-                        @input="onHashInput(hash.functionToExecute,hash.inputmodel,i)"></textarea>
+                    <textarea class="form-control" v-model="generatedChars" rows="5"></textarea>
                 </div>
+
+                <h3 class="col-12 pl-0 text-primary border-bottom">Generate BadChars</h3>
+                <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
+                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number"
+                        v-model="generateBadCharsLength"></div>
+
+                <label class="col-sm-12 col-lg-9">Payload</label>
                 <div class="col-sm-12 col-lg-9 mb-2">
-                    <textarea class="form-control" v-model="hash.outputmodel" rows="5"></textarea>
+                    <textarea class="form-control" v-model="payload" rows="5"></textarea>
                 </div>
-            </template>
+
+                <label class="col-sm-12 col-lg-9">BadChars</label>
+                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="badChars"
+                        @keydown.enter="generateNewPayload"></div>
+
+                <label class="col-sm-12 col-lg-9">New Payload</label>
+                <div class="col-sm-12 col-lg-9 mb-2"><textarea class="form-control" v-model="newPayload"
+                        @keydown.enter="generateNewPayload"></textarea></div>
+                <!--<div class="col-3 align-self-end"><button class="btn btn-primary" @click="generateNewPayload">Generate</button></div>-->
+                <h3 class="col-12 pl-0 text-primary border-bottom">Generate Little Endian</h3>
+                <label class="col-sm-12 col-lg-9">Enter the value to convert</label>
+                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text"
+                        v-model="generateLittleEndian">
+                </div>
+
+                <label class="col-sm-12 col-lg-9">Generated Little Endian</label>
+                <div class="col-sm-12 col-lg-9 mb-2">
+                    <textarea class="form-control" v-model="generatedLittleEndian" rows="5"></textarea>
+                </div>
+
+            </div>
+            <div v-if="filteredType=='hashes'">
+
+                <template v-for="(hash,i) in hashes" :key="'hash'+i">
+                    <h3 class="col-12 pl-0 text-primary border-bottom">{{hash.title}}</h3>
+                    <label class="col-sm-12 col-lg-9">{{hash.label}}</label>
+                    <div class="col-sm-12 col-lg-9 mb-2">
+                        <textarea class="form-control" v-model="hash.inputmodel" rows="5"
+                            @input="onHashInput(hash.functionToExecute,hash.inputmodel,i)"></textarea>
+                    </div>
+                    <div class="col-sm-12 col-lg-9 mb-2">
+                        <textarea class="form-control" v-model="hash.outputmodel" rows="5"></textarea>
+                    </div>
+                </template>
+            </div>
+            <div v-if="filteredType=='crypto'">
+                <h6 class="text-center mt-4">Coming Soon!</h6>
+            </div>
         </div>
 
     </div>
@@ -117,6 +97,20 @@
             data() {
                 return {
                     message: 'Hello Vue!!',
+                    links: [{
+                        name: "Buff. Overflow",
+                        active: true,
+                        type: "buffOvf"
+                    }, {
+                        name: "Hashes",
+                        active: false,
+                        type: "hashes"
+                    }, {
+                        name: "Crypto",
+                        active: false,
+                        type: "crypto"
+                    }],
+                    filteredType: "buffOvf",
                     tableData: [],
                     filename: 'goog.json',
                     charToGenerate: "A",
@@ -137,17 +131,6 @@
                     aesCbcIv: "",
                     generatedAesCbc: "",
                     generateMD5String: "",
-                    generatedMD5: "",
-                    generateSHA1String: "",
-                    generatedSHA1: "",
-                    generateSHA3String: "",
-                    generatedSHA3: "",
-                    generateSHA224String: "",
-                    generatedSHA224: "",
-                    generateSHA256String: "",
-                    generatedSHA256: "",
-                    generateB64String: "",
-                    generatedB64: "",
                     hashes: [
                         {
                             title: "Encode Base64",
@@ -268,6 +251,17 @@
                 this.generateBadChars()
             },
             methods: {
+                filterBytType(t) {
+                    for (let i of this.links) {
+                        if (i.type != t.type) {
+                            i.active = false
+                        } else {
+                            i.active = true
+                        }
+                    }
+                    this.filteredType = t.type
+
+                },
                 startCrackingAesEcb(nv) {
                     if (nv.includes('ENC>')) {
                         e = nv.split('ENC>')[1]
