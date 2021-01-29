@@ -211,10 +211,12 @@
                 },
                 charLengthToGenerate(nv) {
                     this.generatedChars = ""
-                    let a = ""
-                    for (let i = 1; i <= parseInt(this.charLengthToGenerate); i++) {
-                        this.generatedChars = this.generatedChars + this.charToGenerate
-                    }
+                    //let a = ""
+                    //for (let i = 1; i <= parseInt(this.charLengthToGenerate); i++) {
+                     //   this.generatedChars = this.generatedChars + this.charToGenerate
+                    //}
+                    //modern way
+                    this.generatedChars = this.charToGenerate.repeat(this.charLengthToGenerate)
                 },
                 generateAesEcb(nv) {
                     let e = ""
