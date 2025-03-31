@@ -419,11 +419,30 @@
                     ]
                 }
             },
+            created() {
+                // Initialize theme from localStorage
+                this.applyTheme(this.darkMode);
+            },
             methods: {
                 // UI Methods
                 toggleDarkMode() {
                     this.darkMode = !this.darkMode;
                     localStorage.setItem('darkMode', this.darkMode);
+                    this.applyTheme(this.darkMode);
+                    this.showToast(this.darkMode ? 'Dark mode enabled' : 'Light mode enabled');
+                },
+                applyTheme(isDark) {
+                    // Apply theme to document
+                    document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+                    
+                    // Update meta theme-color for mobile browsers
+                    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+                    if (!metaThemeColor) {
+                        const meta = document.createElement('meta');
+                        meta.name = 'theme-color';
+                        document.head.appendChild(meta);
+                    }
+                    metaThemeColor?.setAttribute('content', isDark ? '#212529' : '#ffffff');
                 },
                 async copyToClipboard(text) {
                     try {
