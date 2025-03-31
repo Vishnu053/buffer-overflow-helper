@@ -102,10 +102,102 @@
             background: var(--bs-primary);
             color: white;
         }
+        /* Welcome Modal styles */
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            backdrop-filter: blur(3px);
+        }
+        .welcome-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .welcome-modal-content {
+            background: var(--bs-body-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .welcome-modal.show .welcome-modal-content {
+            transform: translateY(0);
+        }
+        .welcome-feature {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background: var(--bs-secondary-bg);
+        }
+        .welcome-feature i {
+            margin-right: 1rem;
+            color: var(--bs-primary);
+            font-size: 1.25rem;
+        }
     </style>
 </head>
 
 <body :data-bs-theme="darkMode ? 'dark' : 'light'">
+    <!-- Welcome Modal -->
+    <div class="welcome-modal" :class="{ show: showWelcomeModal }" v-show="!welcomeDismissed">
+        <div class="welcome-modal-content" @click.stop>
+            <h2 class="mb-4">Welcome to BuffTools! 🚀</h2>
+            <p class="mb-4">BuffTools is your comprehensive toolkit for buffer overflow testing, hash generation, and cryptographic operations. Here's what you can do:</p>
+            
+            <div class="welcome-feature">
+                <i class="bi bi-shield-lock"></i>
+                <div>
+                    <h5>Buffer Overflow Tools</h5>
+                    <p class="mb-0">Generate patterns, test bad characters, and convert to little endian format for buffer overflow testing.</p>
+                </div>
+            </div>
+
+            <div class="welcome-feature">
+                <i class="bi bi-hash"></i>
+                <div>
+                    <h5>Hash Generation</h5>
+                    <p class="mb-0">Generate various hash formats including MD5, SHA-1, SHA-256, and more. Plus Base64 encoding/decoding.</p>
+                </div>
+            </div>
+
+            <div class="welcome-feature">
+                <i class="bi bi-key"></i>
+                <div>
+                    <h5>Crypto Tools (Coming Soon)</h5>
+                    <p class="mb-0">Advanced encryption and decryption tools for various cryptographic operations.</p>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between align-items-center">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" v-model="dontShowAgain" id="dontShowAgain">
+                    <label class="form-check-label" for="dontShowAgain">
+                        Don't show this again
+                    </label>
+                </div>
+                <button class="btn btn-primary" @click="dismissWelcome">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast container -->
     <div class="toast-container" ref="toastContainer"></div>
     
@@ -309,11 +401,138 @@
 
             <!-- Crypto Tools (Coming Soon) -->
             <div v-if="filteredType=='crypto'" class="row">
-                <div class="col-12 text-center">
+                <!-- Quick Navigation -->
+                <div class="col-12 mb-4">
+                    <div class="quick-nav">
+                        <div class="quick-nav-title">Quick Navigation</div>
+                        <div class="quick-nav-items">
+                            <a href="#aes-ecb" class="quick-nav-link">AES-ECB</a>
+                            <a href="#aes-cbc" class="quick-nav-link">AES-CBC</a>
+                            <a href="#aes-gcm" class="quick-nav-link">AES-GCM</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AES-ECB -->
+                <div id="aes-ecb" class="col-12 mb-4">
                     <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">AES-ECB Mode</h3>
+                        </div>
                         <div class="card-body">
-                            <h3>Crypto Tools</h3>
-                            <p class="text-muted">Coming Soon! Stay tuned for encryption and decryption tools.</p>
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Secret Key
+                                    <span class="tooltip-text">Enter your encryption/decryption key</span>
+                                </label>
+                                <input type="password" class="form-control" v-model="aesEcbKey" placeholder="Enter secret key">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Input Text</label>
+                                <textarea class="form-control" v-model="aesEcbInput" rows="3" placeholder="Enter text to encrypt/decrypt"></textarea>
+                            </div>
+                            <div class="mb-3 d-flex gap-2">
+                                <button class="btn btn-primary" @click="encryptAesEcb">
+                                    <i class="bi bi-lock"></i> Encrypt
+                                </button>
+                                <button class="btn btn-secondary" @click="decryptAesEcb">
+                                    <i class="bi bi-unlock"></i> Decrypt
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Result</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(aesEcbOutput)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="aesEcbOutput" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AES-CBC -->
+                <div id="aes-cbc" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">AES-CBC Mode</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Secret Key
+                                    <span class="tooltip-text">Enter your encryption/decryption key</span>
+                                </label>
+                                <input type="password" class="form-control" v-model="aesCbcKey" placeholder="Enter secret key">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Initialization Vector (IV)
+                                    <span class="tooltip-text">16 bytes IV for CBC mode</span>
+                                </label>
+                                <input type="text" class="form-control" v-model="aesCbcIv" placeholder="Enter IV (16 bytes)">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Input Text</label>
+                                <textarea class="form-control" v-model="aesCbcInput" rows="3" placeholder="Enter text to encrypt/decrypt"></textarea>
+                            </div>
+                            <div class="mb-3 d-flex gap-2">
+                                <button class="btn btn-primary" @click="encryptAesCbc">
+                                    <i class="bi bi-lock"></i> Encrypt
+                                </button>
+                                <button class="btn btn-secondary" @click="decryptAesCbc">
+                                    <i class="bi bi-unlock"></i> Decrypt
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Result</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(aesCbcOutput)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="aesCbcOutput" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AES-GCM -->
+                <div id="aes-gcm" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">AES-GCM Mode</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> GCM mode provides both confidentiality and authenticity.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Secret Key
+                                    <span class="tooltip-text">Enter your encryption/decryption key</span>
+                                </label>
+                                <input type="password" class="form-control" v-model="aesGcmKey" placeholder="Enter secret key">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Input Text</label>
+                                <textarea class="form-control" v-model="aesGcmInput" rows="3" placeholder="Enter text to encrypt/decrypt"></textarea>
+                            </div>
+                            <div class="mb-3 d-flex gap-2">
+                                <button class="btn btn-primary" @click="encryptAesGcm">
+                                    <i class="bi bi-lock"></i> Encrypt
+                                </button>
+                                <button class="btn btn-secondary" @click="decryptAesGcm">
+                                    <i class="bi bi-unlock"></i> Decrypt
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Result</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(aesGcmOutput)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="aesGcmOutput" rows="3" readonly></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -327,7 +546,12 @@
         const app = createApp({
             data() {
                 return {
+                    showWelcomeModal: true,
+                    welcomeDismissed: localStorage.getItem('welcomeDismissed') === 'true',
+                    dontShowAgain: false,
                     darkMode: localStorage.getItem('darkMode') === 'true' || false,
+                    isFirstVisit: !localStorage.getItem('firstVisitDate'),
+                    visitCount: parseInt(localStorage.getItem('visitCount') || '0'),
                     links: [{
                         name: "Buff. Overflow",
                         active: true,
@@ -352,6 +576,19 @@
                     newPayload: "",
                     littleEndianInput: "",
                     generatedLittleEndian: "",
+                    // AES-ECB
+                    aesEcbKey: "",
+                    aesEcbInput: "",
+                    aesEcbOutput: "",
+                    // AES-CBC
+                    aesCbcKey: "",
+                    aesCbcIv: "",
+                    aesCbcInput: "",
+                    aesCbcOutput: "",
+                    // AES-GCM
+                    aesGcmKey: "",
+                    aesGcmInput: "",
+                    aesGcmOutput: "",
                     hashes: [
                         {
                             title: "Base64 Encoder",
@@ -422,8 +659,40 @@
             created() {
                 // Initialize theme from localStorage
                 this.applyTheme(this.darkMode);
+                
+                // Track visit
+                this.trackVisit();
+                
+                // Initialize welcome modal state
+                this.showWelcomeModal = !this.welcomeDismissed;
             },
             methods: {
+                trackVisit() {
+                    // Track first visit
+                    if (this.isFirstVisit) {
+                        localStorage.setItem('firstVisitDate', new Date().toISOString());
+                    }
+                    
+                    // Increment visit count
+                    this.visitCount++;
+                    localStorage.setItem('visitCount', this.visitCount.toString());
+                    
+                    // Show returning user message after 5 visits
+                    if (this.visitCount === 5) {
+                        this.showToast('Thanks for being a regular user! 🌟');
+                    }
+                },
+                dismissWelcome() {
+                    this.showWelcomeModal = false;
+                    if (this.dontShowAgain) {
+                        localStorage.setItem('welcomeDismissed', 'true');
+                        this.welcomeDismissed = true;
+                    }
+                    // Show different message for first-time users
+                    if (this.isFirstVisit) {
+                        this.showToast('Enjoy exploring BuffTools! Let\'s get started 🚀');
+                    }
+                },
                 // UI Methods
                 toggleDarkMode() {
                     this.darkMode = !this.darkMode;
@@ -584,6 +853,127 @@
                         this.generatedLittleEndian = "Error: Invalid input";
                         this.showToast('Failed to convert to little endian', true);
                         console.error('Little endian conversion error:', error);
+                    }
+                },
+                // Crypto Methods
+                encryptAesEcb() {
+                    if (!this.aesEcbKey || !this.aesEcbInput) {
+                        this.showToast('Please provide both key and input text', true);
+                        return;
+                    }
+                    try {
+                        const encrypted = CryptoJS.AES.encrypt(this.aesEcbInput, this.aesEcbKey, {
+                            mode: CryptoJS.mode.ECB,
+                            padding: CryptoJS.pad.Pkcs7
+                        });
+                        this.aesEcbOutput = encrypted.toString();
+                        this.showToast('Text encrypted successfully!');
+                    } catch (error) {
+                        this.aesEcbOutput = 'Error: Encryption failed';
+                        this.showToast('Encryption failed', true);
+                        console.error('AES-ECB encryption error:', error);
+                    }
+                },
+                decryptAesEcb() {
+                    if (!this.aesEcbKey || !this.aesEcbInput) {
+                        this.showToast('Please provide both key and encrypted text', true);
+                        return;
+                    }
+                    try {
+                        const decrypted = CryptoJS.AES.decrypt(this.aesEcbInput, this.aesEcbKey, {
+                            mode: CryptoJS.mode.ECB,
+                            padding: CryptoJS.pad.Pkcs7
+                        });
+                        this.aesEcbOutput = decrypted.toString(CryptoJS.enc.Utf8);
+                        this.showToast('Text decrypted successfully!');
+                    } catch (error) {
+                        this.aesEcbOutput = 'Error: Decryption failed';
+                        this.showToast('Decryption failed', true);
+                        console.error('AES-ECB decryption error:', error);
+                    }
+                },
+                encryptAesCbc() {
+                    if (!this.aesCbcKey || !this.aesCbcIv || !this.aesCbcInput) {
+                        this.showToast('Please provide key, IV, and input text', true);
+                        return;
+                    }
+                    try {
+                        const encrypted = CryptoJS.AES.encrypt(this.aesCbcInput, this.aesCbcKey, {
+                            iv: CryptoJS.enc.Utf8.parse(this.aesCbcIv),
+                            mode: CryptoJS.mode.CBC,
+                            padding: CryptoJS.pad.Pkcs7
+                        });
+                        this.aesCbcOutput = encrypted.toString();
+                        this.showToast('Text encrypted successfully!');
+                    } catch (error) {
+                        this.aesCbcOutput = 'Error: Encryption failed';
+                        this.showToast('Encryption failed', true);
+                        console.error('AES-CBC encryption error:', error);
+                    }
+                },
+                decryptAesCbc() {
+                    if (!this.aesCbcKey || !this.aesCbcIv || !this.aesCbcInput) {
+                        this.showToast('Please provide key, IV, and encrypted text', true);
+                        return;
+                    }
+                    try {
+                        const decrypted = CryptoJS.AES.decrypt(this.aesCbcInput, this.aesCbcKey, {
+                            iv: CryptoJS.enc.Utf8.parse(this.aesCbcIv),
+                            mode: CryptoJS.mode.CBC,
+                            padding: CryptoJS.pad.Pkcs7
+                        });
+                        this.aesCbcOutput = decrypted.toString(CryptoJS.enc.Utf8);
+                        this.showToast('Text decrypted successfully!');
+                    } catch (error) {
+                        this.aesCbcOutput = 'Error: Decryption failed';
+                        this.showToast('Decryption failed', true);
+                        console.error('AES-CBC decryption error:', error);
+                    }
+                },
+                encryptAesGcm() {
+                    if (!this.aesGcmKey || !this.aesGcmInput) {
+                        this.showToast('Please provide both key and input text', true);
+                        return;
+                    }
+                    try {
+                        // Generate random 12 bytes nonce
+                        const nonce = CryptoJS.lib.WordArray.random(12);
+                        const encrypted = CryptoJS.AES.encrypt(this.aesGcmInput, this.aesGcmKey, {
+                            mode: CryptoJS.mode.GCM,
+                            iv: nonce,
+                            padding: CryptoJS.pad.NoPadding
+                        });
+                        // Combine nonce and ciphertext for storage/transmission
+                        this.aesGcmOutput = nonce.toString(CryptoJS.enc.Base64) + ':' + encrypted.toString();
+                        this.showToast('Text encrypted successfully!');
+                    } catch (error) {
+                        this.aesGcmOutput = 'Error: Encryption failed';
+                        this.showToast('Encryption failed', true);
+                        console.error('AES-GCM encryption error:', error);
+                    }
+                },
+                decryptAesGcm() {
+                    if (!this.aesGcmKey || !this.aesGcmInput) {
+                        this.showToast('Please provide both key and encrypted text', true);
+                        return;
+                    }
+                    try {
+                        const [nonceStr, ciphertext] = this.aesGcmInput.split(':');
+                        if (!nonceStr || !ciphertext) {
+                            throw new Error('Invalid encrypted text format');
+                        }
+                        const nonce = CryptoJS.enc.Base64.parse(nonceStr);
+                        const decrypted = CryptoJS.AES.decrypt(ciphertext, this.aesGcmKey, {
+                            mode: CryptoJS.mode.GCM,
+                            iv: nonce,
+                            padding: CryptoJS.pad.NoPadding
+                        });
+                        this.aesGcmOutput = decrypted.toString(CryptoJS.enc.Utf8);
+                        this.showToast('Text decrypted successfully!');
+                    } catch (error) {
+                        this.aesGcmOutput = 'Error: Decryption failed';
+                        this.showToast('Decryption failed', true);
+                        console.error('AES-GCM decryption error:', error);
                     }
                 }
             },
