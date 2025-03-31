@@ -537,6 +537,67 @@
                     </div>
                 </div>
             </div>
+
+            <!-- History -->
+            <div v-if="filteredType=='history'" class="row">
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">Operation History</h3>
+                            <button class="btn btn-danger" @click="clearAllHistory">
+                                <i class="bi bi-trash"></i> Clear All
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div v-if="history.length === 0" class="text-center py-4">
+                                <i class="bi bi-clock-history fs-1 text-muted"></i>
+                                <p class="mt-2 text-muted">No history available</p>
+                            </div>
+                            <div v-else class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>Operation</th>
+                                            <th>Input</th>
+                                            <th>Output</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="item in history" :key="item.id">
+                                            <td>{{ formatDate(item.timestamp) }}</td>
+                                            <td>{{ item.operation }}</td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 200px;">
+                                                    {{ item.input }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 200px;">
+                                                    {{ item.output }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                            @click="copyToClipboard(item.output)">
+                                                        <i class="bi bi-clipboard"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" 
+                                                            @click="deleteHistoryItem(item.id)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -552,6 +613,8 @@
                     darkMode: localStorage.getItem('darkMode') === 'true' || false,
                     isFirstVisit: !localStorage.getItem('firstVisitDate'),
                     visitCount: parseInt(localStorage.getItem('visitCount') || '0'),
+                    history: [],
+                    db: null,
                     links: [{
                         name: "Buff. Overflow",
                         active: true,
@@ -564,6 +627,10 @@
                         name: "Crypto",
                         active: false,
                         type: "crypto"
+                    }, {
+                        name: "History",
+                        active: false,
+                        type: "history"
                     }],
                     filteredType: "buffOvf",
                     charToGenerate: "A",
@@ -665,6 +732,9 @@
                 
                 // Initialize welcome modal state
                 this.showWelcomeModal = !this.welcomeDismissed;
+
+                // Initialize IndexedDB
+                this.initDB();
             },
             methods: {
                 trackVisit() {
@@ -739,6 +809,9 @@
                         result += String.fromCharCode(i - 1);
                     }
                     this.payload = result;
+                    this.addToHistory('Bad Chars Generation', 
+                        `Length: ${this.generateBadCharsLength}`, 
+                        this.payload);
                     this.showToast('Bad chars generated successfully!');
                 },
                 generateNewPayload() {
@@ -752,6 +825,9 @@
                         .split('')
                         .filter(char => !badCharsSet.has(char))
                         .join('');
+                    this.addToHistory('Bad Chars Filtered', 
+                        `Original Length: ${this.payload.length}, Bad Chars: ${this.badChars}`, 
+                        `New Length: ${this.newPayload.length}`);
                     this.showToast('New payload generated successfully!');
                 },
 
@@ -766,30 +842,39 @@
                         switch(func) {
                             case 'base64enc':
                                 this.hashes[index].outputmodel = btoa(input);
+                                this.addToHistory('Base64 Encode', input, this.hashes[index].outputmodel);
                                 break;
                             case 'base64dec':
                                 this.hashes[index].outputmodel = atob(input);
+                                this.addToHistory('Base64 Decode', input, this.hashes[index].outputmodel);
                                 break;
                             case 'md5':
                                 this.hashes[index].outputmodel = CryptoJS.MD5(input).toString();
+                                this.addToHistory('MD5 Hash', input, this.hashes[index].outputmodel);
                                 break;
                             case 'sha1':
                                 this.hashes[index].outputmodel = CryptoJS.SHA1(input).toString();
+                                this.addToHistory('SHA1 Hash', input, this.hashes[index].outputmodel);
                                 break;
                             case 'sha3':
                                 this.hashes[index].outputmodel = CryptoJS.SHA3(input).toString();
+                                this.addToHistory('SHA3 Hash', input, this.hashes[index].outputmodel);
                                 break;
                             case 'sha224':
                                 this.hashes[index].outputmodel = CryptoJS.SHA224(input).toString();
+                                this.addToHistory('SHA224 Hash', input, this.hashes[index].outputmodel);
                                 break;
                             case 'sha256':
                                 this.hashes[index].outputmodel = CryptoJS.SHA256(input).toString();
+                                this.addToHistory('SHA256 Hash', input, this.hashes[index].outputmodel);
                                 break;
                             case 'sha384':
                                 this.hashes[index].outputmodel = CryptoJS.SHA384(input).toString();
+                                this.addToHistory('SHA384 Hash', input, this.hashes[index].outputmodel);
                                 break;
                             case 'sha512':
                                 this.hashes[index].outputmodel = CryptoJS.SHA512(input).toString();
+                                this.addToHistory('SHA512 Hash', input, this.hashes[index].outputmodel);
                                 break;
                         }
                     } catch (error) {
@@ -828,6 +913,9 @@
                     }
                     try {
                         this.generatedChars = this.charToGenerate.repeat(this.charLengthToGenerate);
+                        this.addToHistory('Pattern Generation', 
+                            `Char: ${this.charToGenerate}, Length: ${this.charLengthToGenerate}`, 
+                            this.generatedChars);
                         this.showToast('Pattern generated successfully!');
                     } catch (error) {
                         this.generatedChars = "Error: Invalid input";
@@ -844,6 +932,9 @@
                         const b = this.littleEndianInput.match(/.{1,2}/g);
                         if (b) {
                             this.generatedLittleEndian = "\\x" + b.reverse().join('\\x');
+                            this.addToHistory('Little Endian Conversion', 
+                                this.littleEndianInput, 
+                                this.generatedLittleEndian);
                             this.showToast('Little endian conversion successful!');
                         } else {
                             this.generatedLittleEndian = "Error: Invalid input format";
@@ -867,6 +958,7 @@
                             padding: CryptoJS.pad.Pkcs7
                         });
                         this.aesEcbOutput = encrypted.toString();
+                        this.addToHistory('AES-ECB Encrypt', this.aesEcbInput, this.aesEcbOutput);
                         this.showToast('Text encrypted successfully!');
                     } catch (error) {
                         this.aesEcbOutput = 'Error: Encryption failed';
@@ -885,6 +977,7 @@
                             padding: CryptoJS.pad.Pkcs7
                         });
                         this.aesEcbOutput = decrypted.toString(CryptoJS.enc.Utf8);
+                        this.addToHistory('AES-ECB Decrypt', this.aesEcbInput, this.aesEcbOutput);
                         this.showToast('Text decrypted successfully!');
                     } catch (error) {
                         this.aesEcbOutput = 'Error: Decryption failed';
@@ -904,6 +997,7 @@
                             padding: CryptoJS.pad.Pkcs7
                         });
                         this.aesCbcOutput = encrypted.toString();
+                        this.addToHistory('AES-CBC Encrypt', this.aesCbcInput, this.aesCbcOutput);
                         this.showToast('Text encrypted successfully!');
                     } catch (error) {
                         this.aesCbcOutput = 'Error: Encryption failed';
@@ -923,6 +1017,7 @@
                             padding: CryptoJS.pad.Pkcs7
                         });
                         this.aesCbcOutput = decrypted.toString(CryptoJS.enc.Utf8);
+                        this.addToHistory('AES-CBC Decrypt', this.aesCbcInput, this.aesCbcOutput);
                         this.showToast('Text decrypted successfully!');
                     } catch (error) {
                         this.aesCbcOutput = 'Error: Decryption failed';
@@ -936,15 +1031,14 @@
                         return;
                     }
                     try {
-                        // Generate random 12 bytes nonce
                         const nonce = CryptoJS.lib.WordArray.random(12);
                         const encrypted = CryptoJS.AES.encrypt(this.aesGcmInput, this.aesGcmKey, {
                             mode: CryptoJS.mode.GCM,
                             iv: nonce,
                             padding: CryptoJS.pad.NoPadding
                         });
-                        // Combine nonce and ciphertext for storage/transmission
                         this.aesGcmOutput = nonce.toString(CryptoJS.enc.Base64) + ':' + encrypted.toString();
+                        this.addToHistory('AES-GCM Encrypt', this.aesGcmInput, this.aesGcmOutput);
                         this.showToast('Text encrypted successfully!');
                     } catch (error) {
                         this.aesGcmOutput = 'Error: Encryption failed';
@@ -969,12 +1063,97 @@
                             padding: CryptoJS.pad.NoPadding
                         });
                         this.aesGcmOutput = decrypted.toString(CryptoJS.enc.Utf8);
+                        this.addToHistory('AES-GCM Decrypt', this.aesGcmInput, this.aesGcmOutput);
                         this.showToast('Text decrypted successfully!');
                     } catch (error) {
                         this.aesGcmOutput = 'Error: Decryption failed';
                         this.showToast('Decryption failed', true);
                         console.error('AES-GCM decryption error:', error);
                     }
+                },
+                async initDB() {
+                    const request = indexedDB.open('bufftools_history', 1);
+                    
+                    request.onerror = (event) => {
+                        console.error('IndexedDB error:', event.target.error);
+                        this.showToast('Failed to initialize history database', true);
+                    };
+
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('history')) {
+                            const store = db.createObjectStore('history', { keyPath: 'id', autoIncrement: true });
+                            store.createIndex('timestamp', 'timestamp');
+                        }
+                    };
+
+                    request.onsuccess = (event) => {
+                        this.db = event.target.result;
+                        this.loadHistory();
+                    };
+                },
+                
+                async loadHistory() {
+                    if (!this.db) return;
+                    
+                    const transaction = this.db.transaction(['history'], 'readonly');
+                    const store = transaction.objectStore('history');
+                    const request = store.getAll();
+                    
+                    request.onsuccess = () => {
+                        this.history = request.result.sort((a, b) => b.timestamp - a.timestamp);
+                    };
+                },
+                
+                async addToHistory(operation, input, output) {
+                    if (!this.db) return;
+                    
+                    const transaction = this.db.transaction(['history'], 'readwrite');
+                    const store = transaction.objectStore('history');
+                    
+                    const historyItem = {
+                        timestamp: new Date().getTime(),
+                        operation,
+                        input,
+                        output
+                    };
+                    
+                    store.add(historyItem);
+                    transaction.oncomplete = () => {
+                        this.loadHistory();
+                    };
+                },
+                
+                async deleteHistoryItem(id) {
+                    if (!this.db) return;
+                    
+                    const transaction = this.db.transaction(['history'], 'readwrite');
+                    const store = transaction.objectStore('history');
+                    
+                    store.delete(id);
+                    transaction.oncomplete = () => {
+                        this.loadHistory();
+                        this.showToast('History item deleted');
+                    };
+                },
+                
+                async clearAllHistory() {
+                    if (!confirm('Are you sure you want to clear all history?')) return;
+                    
+                    if (!this.db) return;
+                    
+                    const transaction = this.db.transaction(['history'], 'readwrite');
+                    const store = transaction.objectStore('history');
+                    
+                    store.clear();
+                    transaction.oncomplete = () => {
+                        this.loadHistory();
+                        this.showToast('History cleared');
+                    };
+                },
+                
+                formatDate(timestamp) {
+                    return new Date(timestamp).toLocaleString();
                 }
             },
             watch: {
