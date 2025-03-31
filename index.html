@@ -5,98 +5,329 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BuffTools</title>
-    <script src="https://unpkg.com/vue@latest"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        /* Dark mode styles */
+        [data-bs-theme="dark"] {
+            color-scheme: dark;
+            --bs-body-color: #dee2e6;
+            --bs-body-bg: #212529;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            z-index: 100;
+        }
+        .output-container {
+            position: relative;
+        }
+        /* Add smooth transitions for dark mode */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        /* Tooltip styles */
+        .custom-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .custom-tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: rgba(0,0,0,0.8);
+            color: #fff;
+            text-align: center;
+            padding: 5px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        .custom-tooltip:hover .tooltip-text {
+            visibility: visible;
+        }
+        /* Toast notification styles */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .toast-notification {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            margin: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .toast-notification.show {
+            opacity: 1;
+        }
+        /* Quick nav styles */
+        .quick-nav {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+        }
+        .quick-nav-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--bs-primary);
+        }
+        .quick-nav-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .quick-nav-link {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            color: var(--bs-body-color);
+            background: var(--bs-secondary-bg);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .quick-nav-link:hover {
+            background: var(--bs-primary);
+            color: white;
+        }
+    </style>
 </head>
 
-<body>
+<body :data-bs-theme="darkMode ? 'dark' : 'light'">
+    <!-- Toast container -->
+    <div class="toast-container" ref="toastContainer"></div>
+    
     <div id="report" class="mt-2">
-        <div class="sticky-top bg-white py-1">
-            <nav class="nav nav-pills nav-fill mx-2">
-                <a v-for="(type,i) in links" :key="'type'+i" :class="type.active?'nav-link active':'nav-link'"
-                    aria-current="page" href="#" @click="filterBytType(type)">{{type.name}}</a>
-            </nav>
-        </div>
-        <div class="row col-12 mx-0 mt-3 mb-3 justify-content-start">
-            <div v-if="filteredType=='buffOvf'">
-                <h3 class="col-12 pl-0 text-primary border-bottom">Generate long characters</h3>
-                <label class="col-sm-12 col-lg-9">Enter the preferred character</label>
-                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="charToGenerate">
-                </div>
-
-                <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
-                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number"
-                        v-model="charLengthToGenerate"></div>
-
-                <label class="col-sm-12 col-lg-9">Generated Character</label>
-                <div class="col-sm-12 col-lg-9 mb-2">
-                    <textarea class="form-control" v-model="generatedChars" rows="5"></textarea>
-                </div>
-
-                <h3 class="col-12 pl-0 text-primary border-bottom">Generate BadChars</h3>
-                <label class="col-sm-12 col-lg-9">Enter the preferred length</label>
-                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="number"
-                        v-model="generateBadCharsLength"></div>
-
-                <label class="col-sm-12 col-lg-9">Payload</label>
-                <div class="col-sm-12 col-lg-9 mb-2">
-                    <textarea class="form-control" v-model="payload" rows="5"></textarea>
-                </div>
-
-                <label class="col-sm-12 col-lg-9">BadChars</label>
-                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text" v-model="badChars"
-                        @keydown.enter="generateNewPayload"></div>
-
-                <label class="col-sm-12 col-lg-9">New Payload</label>
-                <div class="col-sm-12 col-lg-9 mb-2"><textarea class="form-control" v-model="newPayload"
-                        @keydown.enter="generateNewPayload"></textarea></div>
-                <!--<div class="col-3 align-self-end"><button class="btn btn-primary" @click="generateNewPayload">Generate</button></div>-->
-                <h3 class="col-12 pl-0 text-primary border-bottom">Generate Little Endian</h3>
-                <label class="col-sm-12 col-lg-9">Enter the value to convert</label>
-                <div class="col-sm-12 col-lg-9 mb-2"><input class="form-control" type="text"
-                        v-model="generateLittleEndian">
-                </div>
-
-                <label class="col-sm-12 col-lg-9">Generated Little Endian</label>
-                <div class="col-sm-12 col-lg-9 mb-2">
-                    <textarea class="form-control" v-model="generatedLittleEndian" rows="5"></textarea>
-                </div>
-
-            </div>
-            <div v-if="filteredType=='hashes'">
-
-                <template v-for="(hash,i) in hashes" :key="'hash'+i">
-                    <h3 class="col-12 pl-0 text-primary border-bottom">{{hash.title}}</h3>
-                    <label class="col-sm-12 col-lg-9">{{hash.label}}</label>
-                    <div class="col-sm-12 col-lg-9 mb-2">
-                        <textarea class="form-control" v-model="hash.inputmodel" rows="5"
-                            @input="onHashInput(hash.functionToExecute,hash.inputmodel,i)"></textarea>
-                    </div>
-                    <div class="col-sm-12 col-lg-9 mb-2">
-                        <textarea class="form-control" v-model="hash.outputmodel" rows="5"></textarea>
-                    </div>
-                </template>
-            </div>
-            <div v-if="filteredType=='crypto'">
-                <h6 class="text-center mt-4">Coming Soon!</h6>
+        <!-- Header with dark mode toggle -->
+        <div class="sticky-top bg-body py-2 border-bottom">
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+                <nav class="nav nav-pills flex-grow-1 mx-2">
+                    <a v-for="(type,i) in links" 
+                       :key="'type'+i" 
+                       :class="type.active ? 'nav-link active' : 'nav-link'"
+                       href="#" 
+                       @click="filterByType(type)">{{type.name}}</a>
+                </nav>
+                <button class="btn btn-outline-primary me-2" @click="toggleDarkMode">
+                    <i :class="darkMode ? 'bi bi-sun' : 'bi bi-moon'"></i>
+                </button>
             </div>
         </div>
 
+        <div class="container-fluid mt-3">
+            <!-- Buffer Overflow Tools -->
+            <div v-if="filteredType=='buffOvf'" class="row">
+                <!-- Quick Navigation -->
+                <div class="col-12 mb-4">
+                    <div class="quick-nav">
+                        <div class="quick-nav-title">Quick Navigation</div>
+                        <div class="quick-nav-items">
+                            <a href="#pattern-generator" class="quick-nav-link">Pattern Generator</a>
+                            <a href="#badchars-generator" class="quick-nav-link">BadChars Generator</a>
+                            <a href="#little-endian" class="quick-nav-link">Little Endian Converter</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern Generator -->
+                <div id="pattern-generator" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">Pattern Generator</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Character
+                                    <span class="tooltip-text">Character to repeat in pattern</span>
+                                </label>
+                                <input class="form-control" type="text" v-model="charToGenerate">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Length
+                                    <span class="tooltip-text">Number of times to repeat the character</span>
+                                </label>
+                                <input class="form-control" type="number" v-model="charLengthToGenerate">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" @click="generatePattern">
+                                    <i class="bi bi-lightning-charge"></i> Generate Pattern
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Generated Pattern</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(generatedChars)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="generatedChars" rows="5" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BadChars Generator -->
+                <div id="badchars-generator" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">BadChars Generator</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Length
+                                    <span class="tooltip-text">Length of bad characters to generate</span>
+                                </label>
+                                <input class="form-control" type="number" v-model="generateBadCharsLength">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" @click="generateBadChars">
+                                    <i class="bi bi-lightning-charge"></i> Generate Bad Chars
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Payload</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(payload)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="payload" rows="5"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Bad Characters
+                                    <span class="tooltip-text">Characters to exclude from payload</span>
+                                </label>
+                                <input class="form-control" type="text" v-model="badChars" 
+                                       >
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" @click="generateNewPayload">
+                                    <i class="bi bi-lightning-charge"></i> Generate New Payload
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">New Payload</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(newPayload)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="newPayload" rows="5" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Little Endian Converter -->
+                <div id="little-endian" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">Little Endian Converter</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label custom-tooltip">
+                                    Input Value
+                                    <span class="tooltip-text">Hex value to convert to little endian</span>
+                                </label>
+                                <input class="form-control" type="text" v-model="littleEndianInput">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" @click="generateLittleEndian">
+                                    <i class="bi bi-lightning-charge"></i> Generate Little Endian
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Little Endian Result</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(generatedLittleEndian)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="generatedLittleEndian" rows="5" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hash Tools -->
+            <div v-if="filteredType=='hashes'" class="row">
+                <!-- Quick Navigation -->
+                <div class="col-12 mb-4">
+                    <div class="quick-nav">
+                        <div class="quick-nav-title">Quick Navigation</div>
+                        <div class="quick-nav-items">
+                            <a v-for="hash in hashes" 
+                               :key="hash.functionToExecute"
+                               :href="'#' + hash.functionToExecute" 
+                               class="quick-nav-link">
+                                {{hash.title}}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-for="(hash,i) in hashes" 
+                     :key="'hash'+i" 
+                     :id="hash.functionToExecute"
+                     class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">{{hash.title}}</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">{{hash.label}}</label>
+                                <textarea class="form-control" v-model="hash.inputmodel" rows="5"
+                                    @input="onHashInput(hash.functionToExecute,hash.inputmodel,i)"></textarea>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Result</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(hash.outputmodel)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="hash.outputmodel" rows="5" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crypto Tools (Coming Soon) -->
+            <div v-if="filteredType=='crypto'" class="row">
+                <div class="col-12 text-center">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Crypto Tools</h3>
+                            <p class="text-muted">Coming Soon! Stay tuned for encryption and decryption tools.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        const ReportApp = {
+        const { createApp, ref, watch } = Vue
+
+        const app = createApp({
             data() {
                 return {
-                    message: 'Hello Vue!!',
+                    darkMode: localStorage.getItem('darkMode') === 'true' || false,
                     links: [{
                         name: "Buff. Overflow",
                         active: true,
@@ -111,8 +342,6 @@
                         type: "crypto"
                     }],
                     filteredType: "buffOvf",
-                    tableData: [],
-                    filename: 'goog.json',
                     charToGenerate: "A",
                     charLengthToGenerate: 2000,
                     generatedChars: "",
@@ -121,339 +350,235 @@
                     payload: "",
                     badChars: "",
                     newPayload: "",
-                    generateLittleEndian: "",
+                    littleEndianInput: "",
                     generatedLittleEndian: "",
-                    generateAesEcb: "",
-                    aesEcbKey: "",
-                    generatedAesEcb: "",
-                    generateAesCbc: "",
-                    aesCbcKey: "",
-                    aesCbcIv: "",
-                    generatedAesCbc: "",
-                    generateMD5String: "",
                     hashes: [
                         {
-                            title: "Encode Base64",
-                            label: "Enter the value to generate",
+                            title: "Base64 Encoder",
+                            label: "Enter text to encode",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "base64enc"
                         },
                         {
-                            title: "Decode Base64",
-                            label: "Enter the value to generate",
+                            title: "Base64 Decoder",
+                            label: "Enter base64 to decode",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "base64dec"
                         },
                         {
-                            title: "Generate MD5",
-                            label: "Enter the value to generate",
+                            title: "MD5 Hash",
+                            label: "Enter text to hash",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "md5"
                         },
                         {
-                            title: "Generate SHA1",
-                            label: "Enter the value to generate",
+                            title: "SHA1 Hash",
+                            label: "Enter text to hash",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "sha1"
                         },
                         {
-                            title: "Generate SHA3",
-                            label: "Enter the value to generate",
+                            title: "SHA3 Hash",
+                            label: "Enter text to hash",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "sha3"
                         },
                         {
-                            title: "Generate SHA224",
-                            label: "Enter the value to generate",
+                            title: "SHA224 Hash",
+                            label: "Enter text to hash",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "sha224"
                         },
                         {
-                            title: "Generate SHA256",
-                            label: "Enter the value to generate",
+                            title: "SHA256 Hash",
+                            label: "Enter text to hash",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "sha256"
                         },
                         {
-                            title: "Generate SHA384",
-                            label: "Enter the value to generate",
+                            title: "SHA384 Hash",
+                            label: "Enter text to hash",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "sha384"
                         },
                         {
-                            title: "Generate SHA512",
-                            label: "Enter the value to generate",
+                            title: "SHA512 Hash",
+                            label: "Enter text to hash",
                             inputmodel: "",
                             outputmodel: "",
                             functionToExecute: "sha512"
                         }
-
                     ]
                 }
             },
-            watch: {
-                generateLittleEndian(nv) {
-                    this.generatedLittleEndian = ""
-                    let b = nv.match(/.{1,2}/g)
-                    this.generatedLittleEndian = "\\x" + b.reverse().join('\\x')
-
-                },
-                generateBadCharsLength(nv) {
-                    this.generateBadChars()
-                },
-                charLengthToGenerate(nv) {
-                    this.generatedChars = ""
-                    //let a = ""
-                    //for (let i = 1; i <= parseInt(this.charLengthToGenerate); i++) {
-                     //   this.generatedChars = this.generatedChars + this.charToGenerate
-                    //}
-                    //modern way
-                    this.generatedChars = this.charToGenerate.repeat(this.charLengthToGenerate)
-                },
-                generateAesEcb(nv) {
-                    let e = ""
-                    this.generatedAesEcb = ""
-                    if (!this.aesEcbKey) { return }
-                    this.startCrackingAesEcb(nv)
-
-                },
-                aesEcbKey(nv) {
-                    if (!nv) { return }
-                    this.startCrackingAesEcb(this.generateAesEcb)
-                },
-                generateAesCbc(nv) {
-                    let e = ""
-                    this.generatedAesEcb = ""
-                    if (!this.aesCbcKey || !this.aesCbcIv) { return }
-                    this.startCrackingAesCbc(nv)
-
-                },
-                aesCbcKey(nv) {
-                    if (!nv || !this.aesCbcIv) { return }
-                    this.startCrackingAesCbc(this.generateAesCbc)
-                },
-                aesCbcIv(nv) {
-                    if (!nv || !this.aesCbcKey) { return }
-                    this.startCrackingAesCbc(this.generateAesCbc)
-                },
-                generateMD5String(nv) {
-                    this.generateMD5(nv)
-                }
-            },
-            mounted() {
-
-                this.generateBadChars()
-            },
             methods: {
-                filterBytType(t) {
-                    for (let i of this.links) {
-                        if (i.type != t.type) {
-                            i.active = false
-                        } else {
-                            i.active = true
-                        }
+                // UI Methods
+                toggleDarkMode() {
+                    this.darkMode = !this.darkMode;
+                    localStorage.setItem('darkMode', this.darkMode);
+                },
+                async copyToClipboard(text) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        this.showToast('Copied to clipboard!');
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        this.showToast('Failed to copy text', true);
                     }
-                    this.filteredType = t.type
+                },
+                filterByType(type) {
+                    this.links.forEach(link => link.active = false);
+                    type.active = true;
+                    this.filteredType = type.type;
+                },
 
-                },
-                startCrackingAesEcb(nv) {
-                    if (nv.includes('ENC>')) {
-                        e = nv.split('ENC>')[1]
-                        this.generatedAesEcb = this.encryptHashEcb(e, this.aesEcbKey)
-                    } else if (nv.includes('DEC>')) {
-                        e = nv.split('DEC>')[1]
-                        this.generatedAesEcb = this.decryptHashEcb(e, this.aesEcbKey)
-                    }
-                },
-                startCrackingAesCbc(nv) {
-                    if (nv.includes('ENC>')) {
-                        e = nv.split('ENC>')[1]
-                        this.generatedAesCbc = this.encryptAesCbcIv(e)
-                    } else if (nv.includes('DEC>')) {
-                        e = nv.split('DEC>')[1]
-                        this.generatedAesCbc = this.decryptAesCbcIv(e)
-                    }
-                },
+                // Buffer Overflow Tools
                 generateBadChars() {
-                    this.payload = ""
-                    if (parseInt(this.generateBadCharsLength) < 16) {
-                        let a = "\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\\x0a\\x0b\\x0c\\x0d\\x0e\\x0f"
-                        for (let i = 1; i <= parseInt(this.generateBadCharsLength); i++) {
-                            this.payload = this.payload + "\\x" + a.split('\\x')[i]
-                        }
-                    } else {
-                        let aa, bb = ""
-                        let a = "\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\\x0a\\x0b\\x0c\\x0d\\x0e\\x0f"
-                        for (let i = 1; i < 16; i++) {
-                            aa = aa + "\\x" + a.split('\\x')[i]
-                        }
-                        setTimeout(() => {
-                            for (let i = 16; i < parseInt(this.generateBadCharsLength); i++) {
-                                bb = bb + "\\x" + i.toString(16)
-                            }
-                            setTimeout(() => {
-                                this.payload = aa + bb
-                                this.payload = this.payload.replace(undefined, '')
-                            }, 400)
-                        }, 500);
-
+                    if (!this.generateBadCharsLength || this.generateBadCharsLength <= 0) {
+                        this.showToast('Please enter a valid length', true);
+                        return;
                     }
-
-                    // console.log(this.payload);
-                },
-                changeTheme() {
-                    document.querySelector('body').style.backgroundColor = "#1b1b1b"
-                    a = document.querySelectorAll('input')
-                    b = document.querySelectorAll('textarea')
-                    for (let i of a) {
-                        i.style.background = "#212529"
-                        i.style.color = "#ffffff"
+                    let result = '';
+                    for (let i = 1; i <= this.generateBadCharsLength; i++) {
+                        result += String.fromCharCode(i - 1);
                     }
-                    for (let i of b) {
-                        i.style.background = "#212529"
-                        i.style.color = "#ffffff"
-                    }
+                    this.payload = result;
+                    this.showToast('Bad chars generated successfully!');
                 },
                 generateNewPayload() {
-                    console.log(this.payload);
-                    if (this.payload && this.badChars) {
-
-                        let a = this.payload
-                        let p = this.badChars;
-                        var newVal = a.replace(/\\x([0-9A-F]{2})/ig, function () {
-                            return String.fromCharCode(parseInt(arguments[1], 16));
-                        });
-                        var newtest = p.replace(/\\x([0-9A-F]{2})/ig, function () {
-                            return String.fromCharCode(parseInt(arguments[1], 16));
-                        });
-                        let b = ""
-                        console.log(newtest);
-                        for (let i of newtest) {
-                            b = newVal.replace(i, '')
-                        }
-                        setTimeout(() => {
-                            console.log(b);
-
-                            this.newPayload = ""
-                            for (let i in b) {
-                                // console.log("\\x" + b.charCodeAt(i).toString(16))
-                                this.newPayload = this.newPayload + "\\x" + b.charCodeAt(i).toString(16)
-                            }
-                        }, 500);
-
+                    if (!this.payload || !this.badChars) {
+                        this.showToast('Please provide both payload and bad chars', true);
+                        return;
                     }
+                    
+                    const badCharsSet = new Set(this.badChars.split(''));
+                    this.newPayload = this.payload
+                        .split('')
+                        .filter(char => !badCharsSet.has(char))
+                        .join('');
+                    this.showToast('New payload generated successfully!');
                 },
-                encryptHashEcb(message = '', key = '') {
-                    var res = CryptoJS.AES.encrypt(message, key);
-                    return res.toString();
-                },
-                decryptHashEcb(message = '', key = '') {
-                    var code = CryptoJS.AES.decrypt(message, key);
-                    var decryptedMessage = code.toString(CryptoJS.enc.Utf8);
 
-                    return decryptedMessage;
-                },
-                encryptAesCbcIv(str) {
-                    var key = CryptoJS.enc.Utf8.parse(this.aesCbcKey);
-                    var iv = CryptoJS.enc.Utf8.parse(this.aesCbcIv);
-
-                    var encrypted = '';
-
-                    var srcs = CryptoJS.enc.Utf8.parse(str);
-                    encrypted = CryptoJS.AES.encrypt(srcs, key, {
-                        iv: iv,
-                        mode: CryptoJS.mode.CBC,
-                        padding: CryptoJS.pad.Pkcs7
-                    });
-
-                    return encrypted.ciphertext.toString();
-                },
-                decryptAesCbcIv(str) {
-                    let [key, iv] = [CryptoJS.enc.Utf8.parse(this.aesCbcKey), CryptoJS.enc.Utf8.parse(this.aesCbcIv)]
-                    var encryptedHexStr = CryptoJS.enc.Hex.parse(str);
-                    var srcs = CryptoJS.enc.Base64.stringify(encryptedHexStr);
-                    var decrypt = CryptoJS.AES.decrypt(srcs, key, {
-                        iv: iv,
-                        mode: CryptoJS.mode.CBC,
-                        padding: CryptoJS.pad.Pkcs7
-                    });
-                    var decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
-                    return decryptedStr.toString();
-                },
-                generateMD5(nv) {
-                    if (nv.length > 0) {
-                        this.generatedMD5 = CryptoJS.MD5(nv).toString()
+                // Hash Functions
+                onHashInput(func, input, index) {
+                    if (!input) {
+                        this.hashes[index].outputmodel = '';
+                        return;
                     }
-                },
-                onHashInput(h, i, index) {
-                    if (h) {
-                        switch (h) {
-                            case 'md5':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = CryptoJS.MD5(i).toString()
-                                }
-                                break;
-                            case 'sha1':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = CryptoJS.SHA1(i).toString()
-                                }
-                                break;
-                            case 'sha3':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = CryptoJS.SHA3(i).toString()
-                                }
-                                break;
-                            case 'sha224':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = CryptoJS.SHA224(i).toString()
-                                }
-                                break;
-                            case 'sha256':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = CryptoJS.SHA256(i).toString()
-                                }
-                                break;
-                            case 'sha384':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = CryptoJS.SHA384(i).toString()
-                                }
-                                break;
-                            case 'sha512':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = CryptoJS.SHA512(i).toString()
-                                }
-                                break;
+
+                    try {
+                        switch(func) {
                             case 'base64enc':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = btoa(i)
-                                }
+                                this.hashes[index].outputmodel = btoa(input);
                                 break;
                             case 'base64dec':
-                                if (i.length > 0) {
-                                    this.hashes[index].outputmodel = atob(i)
-                                }
+                                this.hashes[index].outputmodel = atob(input);
                                 break;
-
-                            default:
+                            case 'md5':
+                                this.hashes[index].outputmodel = CryptoJS.MD5(input).toString();
+                                break;
+                            case 'sha1':
+                                this.hashes[index].outputmodel = CryptoJS.SHA1(input).toString();
+                                break;
+                            case 'sha3':
+                                this.hashes[index].outputmodel = CryptoJS.SHA3(input).toString();
+                                break;
+                            case 'sha224':
+                                this.hashes[index].outputmodel = CryptoJS.SHA224(input).toString();
+                                break;
+                            case 'sha256':
+                                this.hashes[index].outputmodel = CryptoJS.SHA256(input).toString();
+                                break;
+                            case 'sha384':
+                                this.hashes[index].outputmodel = CryptoJS.SHA384(input).toString();
+                                break;
+                            case 'sha512':
+                                this.hashes[index].outputmodel = CryptoJS.SHA512(input).toString();
                                 break;
                         }
+                    } catch (error) {
+                        this.hashes[index].outputmodel = 'Error: Invalid input';
+                        console.error('Hash generation error:', error);
                     }
                 },
-
+                showToast(message, isError = false) {
+                    if (this.$refs.toastContainer) {
+                        const toast = document.createElement('div');
+                        toast.className = 'toast-notification';
+                        toast.textContent = message;
+                        if (isError) {
+                            toast.style.backgroundColor = 'rgba(220, 53, 69, 0.9)'; // Bootstrap danger color
+                        }
+                        this.$refs.toastContainer.appendChild(toast);
+                        
+                        // Trigger reflow to enable transition
+                        toast.offsetHeight;
+                        toast.classList.add('show');
+                        
+                        setTimeout(() => {
+                            toast.classList.remove('show');
+                            setTimeout(() => {
+                                if (toast.parentNode) {  // Check if toast still exists
+                                    toast.remove();
+                                }
+                            }, 300); // Wait for fade out transition
+                        }, 2000); // Show for 2 seconds
+                    }
+                },
+                generatePattern() {
+                    if (!this.charToGenerate) {
+                        this.showToast('Please enter a character', true);
+                        return;
+                    }
+                    try {
+                        this.generatedChars = this.charToGenerate.repeat(this.charLengthToGenerate);
+                        this.showToast('Pattern generated successfully!');
+                    } catch (error) {
+                        this.generatedChars = "Error: Invalid input";
+                        this.showToast('Failed to generate pattern', true);
+                        console.error('Character generation error:', error);
+                    }
+                },
+                generateLittleEndian() {
+                    if (!this.littleEndianInput) {
+                        this.showToast('Please enter a hex value', true);
+                        return;
+                    }
+                    try {
+                        const b = this.littleEndianInput.match(/.{1,2}/g);
+                        if (b) {
+                            this.generatedLittleEndian = "\\x" + b.reverse().join('\\x');
+                            this.showToast('Little endian conversion successful!');
+                        } else {
+                            this.generatedLittleEndian = "Error: Invalid input format";
+                            this.showToast('Invalid hex format', true);
+                        }
+                    } catch (error) {
+                        this.generatedLittleEndian = "Error: Invalid input";
+                        this.showToast('Failed to convert to little endian', true);
+                        console.error('Little endian conversion error:', error);
+                    }
+                }
+            },
+            watch: {
+                charToGenerate() {
+                    if (this.charLengthToGenerate) {
+                        this.generatedChars = this.charToGenerate.repeat(this.charLengthToGenerate);
+                    }
+                }
             }
-        }
+        })
 
-        Vue.createApp(ReportApp).mount('#report')
+        app.mount('#report')
     </script>
-
 </body>
 
 </html>
