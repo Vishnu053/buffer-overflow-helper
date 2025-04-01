@@ -538,6 +538,179 @@
                 </div>
             </div>
 
+            <!-- AV Evasion Tools -->
+            <div v-if="filteredType=='avEvasion'" class="row">
+                <!-- Quick Navigation -->
+                <div class="col-12 mb-4">
+                    <div class="quick-nav">
+                        <div class="quick-nav-title">Quick Navigation</div>
+                        <div class="quick-nav-items">
+                            <a href="#string-encoding" class="quick-nav-link">String Encoding</a>
+                            <a href="#shellcode-encoder" class="quick-nav-link">Shellcode Encoder</a>
+                            <a href="#string-splitter" class="quick-nav-link">String Splitter</a>
+                            <a href="#xor-encoder" class="quick-nav-link">XOR Encoder</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- String Encoding -->
+                <div id="string-encoding" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">String Encoding</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Encode strings to bypass AV detection using various encoding techniques.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Input String</label>
+                                <textarea class="form-control" v-model="avStringInput" rows="3" placeholder="Enter string to encode"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Encoding Type</label>
+                                <select class="form-select" v-model="avStringEncodingType">
+                                    <option value="hex">Hex</option>
+                                    <option value="unicode">Unicode</option>
+                                    <option value="ascii">ASCII</option>
+                                    <option value="rot13">ROT13</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" @click="encodeString">
+                                    <i class="bi bi-lock"></i> Encode
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Encoded Result</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(avStringOutput)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="avStringOutput" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shellcode Encoder -->
+                <div id="shellcode-encoder" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">Shellcode Encoder</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Encode shellcode to bypass AV detection using various encoding techniques.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Shellcode (Hex)</label>
+                                <textarea class="form-control" v-model="shellcodeInput" rows="3" placeholder="Enter shellcode in hex format"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Encoding Type</label>
+                                <select class="form-select" v-model="shellcodeEncodingType">
+                                    <option value="xor">XOR</option>
+                                    <option value="base64">Base64</option>
+                                    <option value="rot">ROT</option>
+                                </select>
+                            </div>
+                            <div class="mb-3" v-if="shellcodeEncodingType === 'xor'">
+                                <label class="form-label">XOR Key (Hex)</label>
+                                <input type="text" class="form-control" v-model="xorKey" placeholder="Enter XOR key in hex">
+                            </div>
+                            <div class="mb-3" v-if="shellcodeEncodingType === 'rot'">
+                                <label class="form-label">ROT Value</label>
+                                <input type="number" class="form-control" v-model="rotValue" min="1" max="255">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" @click="encodeShellcode">
+                                    <i class="bi bi-lock"></i> Encode
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Encoded Shellcode</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(shellcodeOutput)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="shellcodeOutput" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- String Splitter -->
+                <div id="string-splitter" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">String Splitter</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Split strings into smaller parts to bypass AV detection.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Input String</label>
+                                <textarea class="form-control" v-model="splitterInput" rows="3" placeholder="Enter string to split"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Split Length</label>
+                                <input type="number" class="form-control" v-model="splitLength" min="1">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" @click="splitString">
+                                    <i class="bi bi-scissors"></i> Split
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">Split Result</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(splitterOutput)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="splitterOutput" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- XOR Encoder -->
+                <div id="xor-encoder" class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0">XOR Encoder</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> XOR encode data with a custom key to bypass AV detection.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Input Data (Hex)</label>
+                                <textarea class="form-control" v-model="xorInput" rows="3" placeholder="Enter data in hex format"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">XOR Key (Hex)</label>
+                                <input type="text" class="form-control" v-model="xorKey" placeholder="Enter XOR key in hex">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" @click="xorEncode">
+                                    <i class="bi bi-lock"></i> Encode
+                                </button>
+                            </div>
+                            <div class="mb-3 output-container">
+                                <label class="form-label">XOR Encoded Result</label>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" 
+                                        @click="copyToClipboard(xorOutput)">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <textarea class="form-control" v-model="xorOutput" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- History -->
             <div v-if="filteredType=='history'" class="row">
                 <div class="col-12 mb-4">
@@ -627,6 +800,10 @@
                         name: "Crypto",
                         active: false,
                         type: "crypto"
+                    }, {
+                        name: "AV Evasion",
+                        active: false,
+                        type: "avEvasion"
                     }, {
                         name: "History",
                         active: false,
@@ -720,7 +897,20 @@
                             outputmodel: "",
                             functionToExecute: "sha512"
                         }
-                    ]
+                    ],
+                    avStringInput: "",
+                    avStringEncodingType: "hex",
+                    avStringOutput: "",
+                    shellcodeInput: "",
+                    shellcodeEncodingType: "xor",
+                    xorKey: "",
+                    rotValue: 1,
+                    shellcodeOutput: "",
+                    splitterInput: "",
+                    splitLength: 10,
+                    splitterOutput: "",
+                    xorInput: "",
+                    xorOutput: ""
                 }
             },
             created() {
@@ -1069,6 +1259,118 @@
                         this.aesGcmOutput = 'Error: Decryption failed';
                         this.showToast('Decryption failed', true);
                         console.error('AES-GCM decryption error:', error);
+                    }
+                },
+                encodeString() {
+                    if (!this.avStringInput) {
+                        this.showToast('Please enter a string to encode', true);
+                        return;
+                    }
+                    try {
+                        let encoded = '';
+                        switch (this.avStringEncodingType) {
+                            case 'hex':
+                                encoded = this.avStringInput.split('').map(c => c.charCodeAt(0).toString(16)).join(' ');
+                                break;
+                            case 'unicode':
+                                encoded = this.avStringInput.split('').map(c => c.charCodeAt(0).toString(16)).join(' ');
+                                break;
+                            case 'ascii':
+                                encoded = this.avStringInput.split('').map(c => c.charCodeAt(0).toString(16)).join(' ');
+                                break;
+                            case 'rot13':
+                                encoded = this.avStringInput.split('').map(c => {
+                                    const charCode = c.charCodeAt(0);
+                                    if (charCode >= 65 && charCode <= 90) {
+                                        return String.fromCharCode((charCode - 65 + 13) % 26 + 65);
+                                    } else if (charCode >= 97 && charCode <= 122) {
+                                        return String.fromCharCode((charCode - 97 + 13) % 26 + 97);
+                                    } else {
+                                        return c;
+                                    }
+                                }).join('');
+                                break;
+                        }
+                        this.avStringOutput = encoded;
+                        this.addToHistory('String Encoding', this.avStringInput, this.avStringOutput);
+                        this.showToast('String encoded successfully!');
+                    } catch (error) {
+                        this.avStringOutput = 'Error: Encoding failed';
+                        this.showToast('Encoding failed', true);
+                        console.error('String encoding error:', error);
+                    }
+                },
+                encodeShellcode() {
+                    if (!this.shellcodeInput) {
+                        this.showToast('Please enter shellcode to encode', true);
+                        return;
+                    }
+                    try {
+                        let encoded = '';
+                        switch (this.shellcodeEncodingType) {
+                            case 'xor':
+                                const key = this.xorKey ? parseInt(this.xorKey, 16) : 0xAA;
+                                encoded = this.shellcodeInput.split('').map(c => (c.charCodeAt(0) ^ key).toString(16)).join('');
+                                break;
+                            case 'base64':
+                                encoded = btoa(this.shellcodeInput);
+                                break;
+                            case 'rot':
+                                encoded = this.shellcodeInput.split('').map(c => {
+                                    const charCode = c.charCodeAt(0);
+                                    if (charCode >= 65 && charCode <= 90) {
+                                        return String.fromCharCode((charCode - 65 + this.rotValue) % 26 + 65);
+                                    } else if (charCode >= 97 && charCode <= 122) {
+                                        return String.fromCharCode((charCode - 97 + this.rotValue) % 26 + 97);
+                                    } else {
+                                        return c;
+                                    }
+                                }).join('');
+                                break;
+                        }
+                        this.shellcodeOutput = encoded;
+                        this.addToHistory('Shellcode Encoding', this.shellcodeInput, this.shellcodeOutput);
+                        this.showToast('Shellcode encoded successfully!');
+                    } catch (error) {
+                        this.shellcodeOutput = 'Error: Encoding failed';
+                        this.showToast('Encoding failed', true);
+                        console.error('Shellcode encoding error:', error);
+                    }
+                },
+                splitString() {
+                    if (!this.splitterInput) {
+                        this.showToast('Please enter a string to split', true);
+                        return;
+                    }
+                    try {
+                        const parts = [];
+                        for (let i = 0; i < this.splitterInput.length; i += this.splitLength) {
+                            parts.push(this.splitterInput.slice(i, i + this.splitLength));
+                        }
+                        this.splitterOutput = parts.join('\n');
+                        this.addToHistory('String Splitting', this.splitterInput, this.splitterOutput);
+                        this.showToast('String split successfully!');
+                    } catch (error) {
+                        this.splitterOutput = 'Error: Splitting failed';
+                        this.showToast('Splitting failed', true);
+                        console.error('String splitting error:', error);
+                    }
+                },
+                xorEncode() {
+                    if (!this.xorInput || !this.xorKey) {
+                        this.showToast('Please provide both input data and XOR key', true);
+                        return;
+                    }
+                    try {
+                        const key = parseInt(this.xorKey, 16);
+                        const encoded = this.xorInput.split('').map(c => (c.charCodeAt(0) ^ key).toString(16)).join('');
+                        this.xorOutput = encoded;
+                        this.addToHistory('XOR Encoding', this.xorInput, this.xorOutput);
+                        this.showToast('XOR encoded successfully!');
+                    } catch (error) {
+                        this.xorOutput = 'Error: Encoding failed';
+                        this.showToast('Encoding failed', true);
+                        console.error('XOR encoding error:', error);
                     }
                 },
                 async initDB() {
